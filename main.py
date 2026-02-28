@@ -225,7 +225,11 @@ async def toplevel(ctx):
 async def meme(ctx):
     url = "https://memy.jeja.pl/"
     
-    async with aiohttp.ClientSession() as session:
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    
+    async with aiohttp.ClientSession(headers=headers) as session:
         try:
             async with session.get(url) as response:
                 if response.status == 200:
@@ -235,7 +239,7 @@ async def meme(ctx):
                     memes = soup.find_all('div', class_='ob-memy-lista-element')
                     
                     if not memes:
-                        return await ctx.send("❌ Nie znalazłem żadnych nowych memów na Jeja.pl.")
+                        return await ctx.send("❌ Nie znalazłem memów na stronie głównej.")
 
                     target_meme = random.choice(memes)
                     
@@ -256,16 +260,17 @@ async def meme(ctx):
                         embed.set_footer(text="Źródło: Jeja.pl")
                         await ctx.send(embed=embed)
                     else:
-                        await ctx.send("⚠️ Znalazłem mema, ale nie udało się pobrać obrazka. Spróbuj jeszcze raz!")
+                        await ctx.send("⚠️ Znalazłem mema, ale obrazek jest ukryty. Spróbuj jeszcze raz!")
                 else:
                     await ctx.send(f"❌ Błąd połączenia z Jeja.pl (Status: {response.status})")
         except Exception as e:
-            print(f"Błąd przy pobieraniu mema: {e}")
-            await ctx.send("❌ Wystąpił błąd podczas pobierania mema.")
+            print(f"Błąd: {e}")
+            await ctx.send("❌ Wystąpił błąd techniczny podczas pobierania mema.")
 
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
