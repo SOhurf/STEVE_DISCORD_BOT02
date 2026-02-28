@@ -226,46 +226,47 @@ async def meme(ctx):
     url = "https://memy.jeja.pl/"
     
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                html = await response.text()
-                soup = BeautifulSoup(html, 'html.parser')
-                
-                memes = soup.find_all('div', class_='ob-memy-lista-element')
-                
-                if not memes:
-                    return await ctx.send("❌ Nie znaleziono żadnych memów na stronie.")
+        try:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    html = await response.text()
+                    soup = BeautifulSoup(html, 'html.parser')
+                    
+                    memes = soup.find_all('div', class_='ob-memy-lista-element')
+                    
+                    if not memes:
+                        return await ctx.send("❌ Nie znalazłem żadnych nowych memów na Jeja.pl.")
 
-                target_meme = random.choice(memes)
-                
-                title_tag = target_meme.find('a', class_='ob-memy-tytul')
-                img_tag = target_meme.find('img', class_='lazy-img')
-                
-                img_url = img_tag.get('data-src') if img_tag else None
-                post_url = title_tag.get('href') if title_tag else url
-                title = title_tag.get_title() if title_tag else "Mem z Jeja.pl"
+                    target_meme = random.choice(memes)
+                    
+                    title_tag = target_meme.find('a', class_='ob-memy-tytul')
+                    img_tag = target_meme.find('img', class_='lazy-img')
+                    
+                    img_url = img_tag.get('data-src') if img_tag else None
+                    title = title_tag.get_text() if title_tag else "Mem z Jeja.pl"
+                    post_link = title_tag.get('href') if title_tag else url
 
-                if not img_url:
-                    img_tag = target_meme.find('img')
-                    img_url = img_tag.get('src') if img_tag else None
-
-                if img_url:
-                    embed = discord.Embed(
-                        title=f"{title} 👷‍♂️",
-                        url=post_url,
-                        color=discord.Color.green()
-                    )
-                    embed.set_image(url=img_url)
-                    embed.set_footer(text="Źródło: Jeja.pl")
-                    await ctx.send(embed=embed)
+                    if img_url:
+                        embed = discord.Embed(
+                            title=f"{title} 👷‍♂️",
+                            url=post_link,
+                            color=discord.Color.green()
+                        )
+                        embed.set_image(url=img_url)
+                        embed.set_footer(text="Źródło: Jeja.pl")
+                        await ctx.send(embed=embed)
+                    else:
+                        await ctx.send("⚠️ Znalazłem mema, ale nie udało się pobrać obrazka. Spróbuj jeszcze raz!")
                 else:
-                    await ctx.send("❌ Znalazłem mema, ale nie mogłem pobrać jego obrazka.")
-            else:
-                await ctx.send(f"❌ Serwer Jeja.pl nie odpowiada (Kod: {response.status})")
+                    await ctx.send(f"❌ Błąd połączenia z Jeja.pl (Status: {response.status})")
+        except Exception as e:
+            print(f"Błąd przy pobieraniu mema: {e}")
+            await ctx.send("❌ Wystąpił błąd podczas pobierania mema.")
 
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
