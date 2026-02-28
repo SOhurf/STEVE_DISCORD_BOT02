@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import json
 import random
 from keep_alive import keep_alive
+from bs4 import BeautifulSoup
 
 # LOADING BOT AND MAIN VARS #
 load_dotenv()
@@ -227,26 +228,45 @@ async def meme(ctx):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
-                data = await response.json()
+                html = await response.text()
+                soup = BeautifulSoup(html, 'html.parser')
                 
-                if data.get('nsfw') and not ctx.channel.is_nsfw():
-                    return await ctx.send("🔞 Ten mem jest NSFW. Spróbuj ponownie lub użyj kanału NSFW!")
+                memes = soup.find_all('div', class_='ob-memy-lista-element')
+                
+                if not memes:
+                    return await ctx.send("❌ Nie znaleziono żadnych memów na stronie.")
 
-                embed = discord.Embed(
-                    title=f"{data['title']} 👷‍♂️", 
-                    url=data['postLink'], 
-                    color=discord.Color.random()
-                )
-                embed.set_image(url=data['url'])
-                embed.set_footer(text=f"Autor: {data['author']} | 👍 {data['ups']}")
+                target_meme = random.choice(memes)
                 
-                await ctx.send(embed=embed)
+                title_tag = target_meme.find('a', class_='ob-memy-tytul')
+                img_tag = target_meme.find('img', class_='lazy-img')
+                
+                img_url = img_tag.get('data-src') if img_tag else None
+                post_url = title_tag.get('href') if title_tag else url
+                title = title_tag.get_title() if title_tag else "Mem z Jeja.pl"
+
+                if not img_url:
+                    img_tag = target_meme.find('img')
+                    img_url = img_tag.get('src') if img_tag else None
+
+                if img_url:
+                    embed = discord.Embed(
+                        title=f"{title} 👷‍♂️",
+                        url=post_url,
+                        color=discord.Color.green()
+                    )
+                    embed.set_image(url=img_url)
+                    embed.set_footer(text="Źródło: Jeja.pl")
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send("❌ Znalazłem mema, ale nie mogłem pobrać jego obrazka.")
             else:
-                await ctx.send("❌ Nie udało się pobrać mema. Spróbuj później.")
+                await ctx.send(f"❌ Serwer Jeja.pl nie odpowiada (Kod: {response.status})")
 
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
