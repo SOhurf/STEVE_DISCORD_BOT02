@@ -10,7 +10,7 @@ from keep_alive import keep_alive
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
 
-filePath = "data.json" 
+filePath = "/app/data/data.json" 
 levelUpChannelId = 1459662203102957645
 
 if not token:
@@ -221,3 +221,4 @@ async def toplevel(ctx):
 # RUN #
 keep_alive()
 bot.run(token)
+
