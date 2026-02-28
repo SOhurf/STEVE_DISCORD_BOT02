@@ -219,9 +219,47 @@ async def toplevel(ctx):
 
     embed = discord.Embed(title="🏆 **Top 10 Graczy**", description=description or "Brak danych.", color=discord.Color.gold())
     await ctx.send(embed=embed)
+
+@bot.command()
+async def meme(ctx):
+    url = "https://memy.pl/losuj"
+    
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    
+    async with aiohttp.ClientSession(headers=headers) as session:
+        async with session.get(url) as response:
+            if response.status == 200:
+                html = await response.text()
+                soup = BeautifulSoup(html, 'html.parser')
+                meme_tag = soup.find('img', class_='img-responsive')
+                
+                if meme_tag and meme_tag.get('src'):
+                    image_url = meme_tag.get('src')
+                    
+                    if image_url.startswith('//'):
+                        image_url = f"https:{image_url}"
+                    
+                    embed = discord.Embed(
+                        title="**Losowy Mem 👷‍♂️**", 
+                        color=discord.Color.gold()
+                    )
+                    embed.set_image(url=image_url)
+                    await ctx.send(embed=embed)
+                else:
+                    await ctx.send("Znalazłem stronę, ale nie widzę na niej mema! 🕵️‍♂️")
+            else:
+                await ctx.send(f"Błąd połączenia: {response.status}. Spróbuj później!")
+
+
 # RUN #
 keep_alive()
-bot.run(token)
+try:
+    bot.run(token)
+except discord.errors.HTTPException as e:
+    print(f"❌ Błąd logowania: {e}")
+
 
 
 
