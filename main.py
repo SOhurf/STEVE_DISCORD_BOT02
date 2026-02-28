@@ -222,7 +222,7 @@ async def toplevel(ctx):
 
 @bot.command()
 async def meme(ctx):
-    url = "https://memy.pl/losuj"
+    url = "https://memy.pl/"
     
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
@@ -259,6 +259,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
