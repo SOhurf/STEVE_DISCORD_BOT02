@@ -179,7 +179,6 @@ async def pomoc(ctx):
         "**!profil <@użytkownik>** - Pokazuje profil.",
         "**!avatar <@użytkownik>** - Pokazuje awatar.",
         "**!toplevel** - Pokazuje topka graczy (level).",
-        "**!meme** - Randomowy mem.",
         "\n**--- KOMENDY ADMINISTRACYJNE 🔨 ---**",
         "**!clear <ilość>** - Usuwa wiadomości.",
     ]
@@ -220,56 +219,10 @@ async def toplevel(ctx):
 
     embed = discord.Embed(title="🏆 **Top 10 Graczy**", description=description or "Brak danych.", color=discord.Color.gold())
     await ctx.send(embed=embed)
-
-@bot.command()
-async def meme(ctx):
-    url = "https://memy.jeja.pl/"
-    
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
-    
-    async with aiohttp.ClientSession(headers=headers) as session:
-        try:
-            async with session.get(url) as response:
-                if response.status == 200:
-                    html = await response.text()
-                    soup = BeautifulSoup(html, 'html.parser')
-                    
-                    memes = soup.find_all('div', class_='ob-memy-lista-element')
-                    
-                    if not memes:
-                        return await ctx.send("❌ Nie znalazłem memów na stronie głównej.")
-
-                    target_meme = random.choice(memes)
-                    
-                    title_tag = target_meme.find('a', class_='ob-memy-tytul')
-                    img_tag = target_meme.find('img', class_='lazy-img')
-                    
-                    img_url = img_tag.get('data-src') if img_tag else None
-                    title = title_tag.get_text() if title_tag else "Mem z Jeja.pl"
-                    post_link = title_tag.get('href') if title_tag else url
-
-                    if img_url:
-                        embed = discord.Embed(
-                            title=f"{title} 👷‍♂️",
-                            url=post_link,
-                            color=discord.Color.green()
-                        )
-                        embed.set_image(url=img_url)
-                        embed.set_footer(text="Źródło: Jeja.pl")
-                        await ctx.send(embed=embed)
-                    else:
-                        await ctx.send("⚠️ Znalazłem mema, ale obrazek jest ukryty. Spróbuj jeszcze raz!")
-                else:
-                    await ctx.send(f"❌ Błąd połączenia z Jeja.pl (Status: {response.status})")
-        except Exception as e:
-            print(f"Błąd: {e}")
-            await ctx.send("❌ Wystąpił błąd techniczny podczas pobierania mema.")
-
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
