@@ -222,13 +222,24 @@ async def toplevel(ctx):
 
 @bot.command()
 async def meme(ctx):
+    url = "https://meme-api.com/gimme/memes"
+    
     async with aiohttp.ClientSession() as session:
-        async with session.get("https://meme-api.com/gimme/memes") as response:
+        async with session.get(url) as response:
             if response.status == 200:
                 data = await response.json()
-                embed = discord.Embed(f"title={data['title']} + 👷‍♂️", url=data['postLink'], color=discord.Color.random())
+                
+                if data.get('nsfw') and not ctx.channel.is_nsfw():
+                    return await ctx.send("🔞 Ten mem jest NSFW. Spróbuj ponownie lub użyj kanału NSFW!")
+
+                embed = discord.Embed(
+                    title=f"{data['title']} 👷‍♂️", 
+                    url=data['postLink'], 
+                    color=discord.Color.random()
+                )
                 embed.set_image(url=data['url'])
                 embed.set_footer(text=f"Autor: {data['author']} | 👍 {data['ups']}")
+                
                 await ctx.send(embed=embed)
             else:
                 await ctx.send("❌ Nie udało się pobrać mema. Spróbuj później.")
@@ -236,6 +247,7 @@ async def meme(ctx):
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
