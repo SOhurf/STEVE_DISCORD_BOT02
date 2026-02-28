@@ -222,17 +222,24 @@ async def toplevel(ctx):
 
 @bot.command()
 async def meme(ctx):
+    subreddit = "Polska"
+    url = f"https://meme-api.com/gimme/{subreddit}"
+    
     async with aiohttp.ClientSession() as session:
-        async with session.get("https://meme-api.com/gimme/memes") as response:
-            data = await response.json()
-            embed = discord.Embed(title=data['title'], url=data['postLink'], color=discord.Color.random())
-            embed.set_image(url=data['url'])
-            embed.set_footer(text=f"Autor: {data['author']} | 👍 {data['ups']}")
-            await ctx.send(embed=embed)
+        async with session.get(url) as response:
+            if response.status == 200:
+                data = await response.json()
+                embed = discord.Embed(title=data['title'], url=data['postLink'], color=discord.Color.random())
+                embed.set_image(url=data['url'])
+                embed.set_footer(text=f"Źródło: r/{data['subreddit']} | Autor: {data['author']}")
+                await ctx.send(embed=embed)
+            else:
+                await ctx.send(f"❌ Nie udało się pobrać mema z r/{subreddit}. Może ten subreddit nie istnieje?")
 
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
