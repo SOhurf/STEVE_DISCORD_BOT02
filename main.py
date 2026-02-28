@@ -226,7 +226,7 @@ async def meme(ctx):
         async with session.get("https://meme-api.com/gimme/memes") as response:
             if response.status == 200:
                 data = await response.json()
-                embed = discord.Embed(title=fdata['title'] + "👷‍♂️", url=data['postLink'], color=discord.Color.random())
+                embed = discord.Embed(f"title={data['title']} + 👷‍♂️", url=data['postLink'], color=discord.Color.random())
                 embed.set_image(url=data['url'])
                 embed.set_footer(text=f"Autor: {data['author']} | 👍 {data['ups']}")
                 await ctx.send(embed=embed)
@@ -236,6 +236,7 @@ async def meme(ctx):
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
