@@ -2,5 +2,6 @@ discord.py
 python-dotenv
 aiohttp
 flask
-bs4
+beautifulsoup4
+
 
