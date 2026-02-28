@@ -178,7 +178,7 @@ async def pomoc(ctx):
         "**!profil <@użytkownik>** - Pokazuje profil.",
         "**!avatar <@użytkownik>** - Pokazuje awatar.",
         "**!toplevel** - Pokazuje topka graczy (level).",
-        "**!meme** - Randomowy mem z Reddita.",
+        "**!meme** - Randomowy mem.",
         "\n**--- KOMENDY ADMINISTRACYJNE 🔨 ---**",
         "**!clear <ilość>** - Usuwa wiadomości.",
     ]
@@ -222,23 +222,21 @@ async def toplevel(ctx):
 
 @bot.command()
 async def meme(ctx):
-    subreddit = "Polska"
-    url = f"https://meme-api.com/gimme/{subreddit}"
-    
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get("https://meme-api.com/gimme/memes") as response:
             if response.status == 200:
                 data = await response.json()
-                embed = discord.Embed(title=data['title'], url=data['postLink'], color=discord.Color.random())
+                embed = discord.Embed(title=fdata['title'] + "👷‍♂️", url=data['postLink'], color=discord.Color.random())
                 embed.set_image(url=data['url'])
-                embed.set_footer(text=f"Źródło: r/{data['subreddit']} | Autor: {data['author']}")
+                embed.set_footer(text=f"Autor: {data['author']} | 👍 {data['ups']}")
                 await ctx.send(embed=embed)
             else:
-                await ctx.send(f"❌ Nie udało się pobrać mema z r/{subreddit}. Może ten subreddit nie istnieje?")
+                await ctx.send("❌ Nie udało się pobrać mema. Spróbuj później.")
 
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
