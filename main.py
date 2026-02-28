@@ -115,15 +115,14 @@ async def give_voice_xp():
 @tasks.loop(minutes=1)
 async def update_status():
     currentTime = datetime.now()
-    uptime = currentTime - dateTime
+    uptime = currentTime - startTime 
 
     readableTime = format_uptime(uptime)
+    await bot.change_presence(activity=discord.Game(name=f"Online od: {readableTime}"))
 
-    await bot.change_presence(activity=discord.Game(name=f"Online od: {readableTime}...")
 @update_status.before_loop
 async def before_update_status():
     await bot.wait_until_ready()
-
 # BOT EVENTS #
 @bot.event
 async def on_ready():
@@ -265,6 +264,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
