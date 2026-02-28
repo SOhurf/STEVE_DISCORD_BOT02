@@ -220,47 +220,6 @@ async def toplevel(ctx):
     embed = discord.Embed(title="🏆 **Top 10 Graczy**", description=description or "Brak danych.", color=discord.Color.gold())
     await ctx.send(embed=embed)
 
-@bot.command()
-async def meme(ctx):
-    url = "https://memy.pl/losuj"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-    }
-    
-    # Informujemy użytkownika, że bot pracuje (fajny efekt wizualny)
-    async with ctx.typing():
-        async with aiohttp.ClientSession(headers=headers) as session:
-            try:
-                async with session.get(url, timeout=10) as response:
-                    if response.status == 200:
-                        html = await response.text()
-                        soup = BeautifulSoup(html, 'html.parser')
-                        
-                        target = soup.find('div', class_='item-image') or soup.find('div', class_='item-content')
-                        
-                        img_url = None
-                        if target:
-                            img_tag = target.find('img')
-                            if img_tag:
-                                img_url = img_tag.get('src') or img_tag.get('data-src')
-
-                        if img_url:
-                            if img_url.startswith('//'):
-                                img_url = f"https:{img_url}"
-                            elif not img_url.startswith('http'):
-                                img_url = f"https://memy.pl{img_url}"
-
-                            embed = discord.Embed(title="**Losowy Mem 👷‍♂️**", color=discord.Color.gold())
-                            embed.set_image(url=img_url)
-                            await ctx.send(embed=embed)
-                        else:
-                            await ctx.send("Znalazłem stronę, ale mem się schował pod warstwą betonu! Spróbuj !meme jeszcze raz. 🏗️")
-                    else:
-                        await ctx.send(f"Błąd połączenia: {response.status}")
-            except Exception as e:
-                print(f"BŁĄD SCRAPERA: {e}")
-                await ctx.send("Coś poszło nie tak przy kopaniu memów... ⛏️")status})")
-
 
 # RUN #
 keep_alive()
@@ -268,6 +227,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
