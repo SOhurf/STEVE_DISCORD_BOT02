@@ -163,7 +163,7 @@ async def profil(ctx, member: discord.Member = None):
     if user_data:
         xp_limit = user_data["level"] * 100
         embed = discord.Embed(
-            title=f"**Profil Gracza: `{user_data['username']}`**",
+            title=f"**Profil Gracza: `{user_data['username']}`👷‍♂️**",
             description=f"**Poziom: `{user_data['level']}`**\n"
                         f"**EXP: `{user_data['exp']}/{xp_limit}`**\n"
                         f"**ID: `{user_data['id']}`**",
@@ -177,6 +177,7 @@ async def pomoc(ctx):
         "**!profil <@użytkownik>** - Pokazuje profil.",
         "**!avatar <@użytkownik>** - Pokazuje awatar.",
         "**!toplevel** - Pokazuje topka graczy (level).",
+        "**!meme** - Randomowy mem z Reddita.",
         "\n**--- KOMENDY ADMINISTRACYJNE 🔨 ---**",
         "**!clear <ilość>** - Usuwa wiadomości.",
     ]
@@ -218,7 +219,18 @@ async def toplevel(ctx):
     embed = discord.Embed(title="🏆 **Top 10 Graczy**", description=description or "Brak danych.", color=discord.Color.gold())
     await ctx.send(embed=embed)
 
+@bot.command()
+async def meme(ctx):
+    async with aiohttp.ClientSession() as session:
+        async with session.get("https://meme-api.com/gimme/memes") as response:
+            data = await response.json()
+            embed = discord.Embed(title=data['title'], url=data['postLink'], color=discord.Color.random())
+            embed.set_image(url=data['url'])
+            embed.set_footer(text=f"Autor: {data['author']} | 👍 {data['ups']}")
+            await ctx.send(embed=embed)
+
 # RUN #
 keep_alive()
 bot.run(token)
+
 
