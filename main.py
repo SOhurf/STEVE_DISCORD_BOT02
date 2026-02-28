@@ -222,10 +222,9 @@ async def toplevel(ctx):
 
 @bot.command()
 async def meme(ctx):
-    url = "https://memy.pl/"
-    
+    url = "https://memy.pl/losuj"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
     
     async with aiohttp.ClientSession(headers=headers) as session:
@@ -233,24 +232,30 @@ async def meme(ctx):
             if response.status == 200:
                 html = await response.text()
                 soup = BeautifulSoup(html, 'html.parser')
-                meme_tag = soup.find('img', class_='img-responsive')
+
                 
-                if meme_tag and meme_tag.get('src'):
-                    image_url = meme_tag.get('src')
+                container = soup.find('div', class_='item-image')
+                image_tag = None
+                
+                if container:
+                    image_tag = container.find('img')
+                
+                if not image_tag:
+                    image_tag = soup.find('img', class_='img-responsive')
+
+                if image_tag and image_tag.get('src'):
+                    image_url = image_tag.get('src')
                     
                     if image_url.startswith('//'):
                         image_url = f"https:{image_url}"
                     
-                    embed = discord.Embed(
-                        title="**Losowy Mem 👷‍♂️**", 
-                        color=discord.Color.gold()
-                    )
+                    embed = discord.Embed(title="**Losowy Mem 👷‍♂️**", color=discord.Color.gold())
                     embed.set_image(url=image_url)
                     await ctx.send(embed=embed)
                 else:
-                    await ctx.send("Znalazłem stronę, ale nie widzę na niej mema! 🕵️‍♂️")
+                    await ctx.send("Znalazłem stronę, ale obrazek się schował! Spróbuj jeszcze raz.")
             else:
-                await ctx.send(f"Błąd połączenia: {response.status}. Spróbuj później!")
+                await ctx.send(f"Błąd: Serwer memów nie odpowiada (Kod: {response.status})")
 
 
 # RUN #
@@ -259,6 +264,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
