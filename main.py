@@ -195,7 +195,6 @@ async def on_message(message):
 # CLASSES #
 class MinesweeperButton(discord.ui.Button):
     def __init__(self, x, y, is_mine, neighbor_count):
-        # We use row=y to keep the 3x3 grid shape
         super().__init__(label="?", style=discord.ButtonStyle.secondary, row=y)
         self.x = x
         self.y = y
@@ -203,7 +202,6 @@ class MinesweeperButton(discord.ui.Button):
         self.neighbor_count = neighbor_count
 
     async def callback(self, interaction: discord.Interaction):
-        # Owner Check
         if interaction.user.id != self.view.owner_id:
             return await interaction.response.send_message("**❌To nie twoja gra!**", ephemeral=True)
 
@@ -214,12 +212,10 @@ class MinesweeperButton(discord.ui.Button):
             self.label = str(self.neighbor_count) if self.neighbor_count > 0 else "0"
             self.disabled = True
             
-            # Logic to check for win
             self.view.safe_tiles_cleared += 1
             if self.view.safe_tiles_cleared == (3 * 3 - self.view.num_mines):
                 await self.view.end_game(interaction, won=True)
             else:
-                # Update the visual grid in the embed
                 await interaction.response.edit_message(embed=self.view.create_embed(), view=self.view)
 
 class MinesweeperGame(discord.ui.View):
@@ -234,7 +230,6 @@ class MinesweeperGame(discord.ui.View):
         self.create_board()
 
     def create_board(self):
-        # Initialize 3x3 grid
         self.board_data = [[0 for _ in range(self.grid_size)] for _ in range(self.grid_size)]
         mine_slots = random.sample(range(9), self.num_mines)
         
@@ -263,7 +258,7 @@ class MinesweeperGame(discord.ui.View):
 
         if self.game_over:
             color = discord.Color.green() if self.won else discord.Color.red()
-            status = "!" if self.won else "**💥 KABOOM!**"
+            status = "**🎉WYGRAŁEŚ!**" if self.won else "**💥 KABOOM!**"
 
         embed = discord.Embed(title="Saper👷‍♂️", color=color)
         embed.description = f"**Status:** {status}\n**Właściciel:** <@{self.owner_id}>\n\n"
@@ -277,7 +272,7 @@ class MinesweeperGame(discord.ui.View):
                     else: grid_text += f"{child.label}️⃣ "
                 else:
                     grid_text += "❓ "
-            if child.x == 2: grid_text += "\n" # New line every 3 buttons
+            if child.x == 2: grid_text += "\n"
             
         embed.add_field(name="Plansza", value=grid_text)
         embed.set_footer(text="Kliknij w przycisk aby zacząć grę!")
@@ -372,6 +367,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
