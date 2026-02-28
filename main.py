@@ -266,7 +266,7 @@ class MinesweeperGame(discord.ui.View):
             status = "!" if self.won else "**💥 KABOOM!**"
 
         embed = discord.Embed(title="Saper👷‍♂️", color=color)
-        embed.description = f"**Status:** `{status}`\n**Właściciel:** <@{self.owner_id}>\n\n"
+        embed.description = f"**Status:** {status}\n**Właściciel:** <@{self.owner_id}>\n\n"
         
         grid_text = ""
         for child in self.children:
@@ -372,6 +372,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
