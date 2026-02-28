@@ -7,6 +7,8 @@ import json
 import random
 from keep_alive import keep_alive
 from bs4 import BeautifulSoup
+import time
+from datetime import datetime
 
 # LOADING BOT AND MAIN VARS #
 load_dotenv()
@@ -14,6 +16,7 @@ token = os.getenv("DISCORD_TOKEN")
 
 filePath = "/app/data/data.json" 
 levelUpChannelId = 1459662203102957645
+startTime = datetime.now()
 
 if not token:
     print("❌ ERROR: No DISCORD_TOKEN found in environment variables.")
@@ -44,6 +47,25 @@ def save_data(data):
             json.dump(data, f, indent=4, ensure_ascii=False)
     except IOError as e:
         print(f"❌ Błąd zapisu danych: {e}")
+
+def format_uptime(delta):
+    seconds = int(delta.total_seconds())
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    days, hours = divmod(hours, 24)
+
+    parts = []
+    if days > 0:
+        parts.append(f"{days}dni")
+    if hours > 0:
+        parts.append(f"{hours}h")
+    if minutes > 0:
+        parts.append(f"{minutes}m")
+    
+    if not parts:
+        return "przed chwilą"
+        
+    return " ".join(parts)
 
 # BACKGROUND VOICE LOOP #
 @tasks.loop(minutes=1.5)
@@ -89,10 +111,26 @@ async def give_voice_xp():
     if updated:
         save_data(data)
 
+# STATUS #
+@tasks.loop(minutes=1)
+async def update_status():
+    currentTime = datetime.now()
+    uptime = currentTime - dateTime
+
+    readableTime = format_uptime(uptime)
+
+    await bot.change_presence(activity=discord.Game(name=f"Online od: {readableTime}..."
+@update_status.before_loop
+async def before_update_status():
+    await bot.wait_until_ready()
+
 # BOT EVENTS #
 @bot.event
 async def on_ready():
     print(f"✅ Bot jest online jako {bot.user} (ID: {bot.user.id})")
+
+    if not update_status.is_running():
+        update_status.start()
     
     if not give_voice_xp.is_running():
         give_voice_xp.start()
@@ -227,6 +265,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
