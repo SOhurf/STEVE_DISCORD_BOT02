@@ -192,6 +192,109 @@ async def on_message(message):
         save_data(data)
     await bot.process_commands(message)
 
+# CLASSES #
+class MinesweeperButton(discord.ui.Button):
+    def __init__(self, x, y, is_mine, neighbor_count):
+        # We use row=y to keep the 3x3 grid shape
+        super().__init__(label="?", style=discord.ButtonStyle.secondary, row=y)
+        self.x = x
+        self.y = y
+        self.is_mine = is_mine
+        self.neighbor_count = neighbor_count
+
+    async def callback(self, interaction: discord.Interaction):
+        # Owner Check
+        if interaction.user.id != self.view.owner_id:
+            return await interaction.response.send_message("**❌To nie twoja gra!**", ephemeral=True)
+
+        if self.is_mine:
+            await self.view.end_game(interaction, won=False)
+        else:
+            self.style = discord.ButtonStyle.success
+            self.label = str(self.neighbor_count) if self.neighbor_count > 0 else "0"
+            self.disabled = True
+            
+            # Logic to check for win
+            self.view.safe_tiles_cleared += 1
+            if self.view.safe_tiles_cleared == (3 * 3 - self.view.num_mines):
+                await self.view.end_game(interaction, won=True)
+            else:
+                # Update the visual grid in the embed
+                await interaction.response.edit_message(embed=self.view.create_embed(), view=self.view)
+
+class MinesweeperGame(discord.ui.View):
+    def __init__(self, owner_id):
+        super().__init__(timeout=120)
+        self.owner_id = owner_id
+        self.grid_size = 3
+        self.num_mines = 2
+        self.safe_tiles_cleared = 0
+        self.game_over = False
+        self.won = False
+        self.create_board()
+
+    def create_board(self):
+        # Initialize 3x3 grid
+        self.board_data = [[0 for _ in range(self.grid_size)] for _ in range(self.grid_size)]
+        mine_slots = random.sample(range(9), self.num_mines)
+        
+        for slot in mine_slots:
+            self.board_data[slot // 3][slot % 3] = -1
+
+        for y in range(self.grid_size):
+            for x in range(self.grid_size):
+                is_mine = self.board_data[y][x] == -1
+                count = self.get_neighbors(x, y) if not is_mine else 0
+                self.add_item(MinesweeperButton(x, y, is_mine, count))
+
+    def get_neighbors(self, x, y):
+        count = 0
+        for dx in [-1, 0, 1]:
+            for dy in [-1, 0, 1]:
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < 3 and 0 <= ny < 3:
+                    if self.board_data[ny][nx] == -1:
+                        count += 1
+        return count
+
+    def create_embed(self):
+        color = discord.Color.blue()
+        status = "**Gra trwa!**"
+
+        if self.game_over:
+            color = discord.Color.green() if self.won else discord.Color.red()
+            status = "!" if self.won else "**💥 KABOOM!**"
+
+        embed = discord.Embed(title="Saper👷‍♂️", color=color)
+        embed.description = f"**Status:** `{status}`\n**Właściciel:** <@{self.owner_id}>\n\n"
+        
+        grid_text = ""
+        for child in self.children:
+            if isinstance(child, MinesweeperButton):
+                if child.disabled or self.game_over:
+                    if child.is_mine: grid_text += "💣 "
+                    elif child.label == "0": grid_text += "⬛ "
+                    else: grid_text += f"{child.label}️⃣ "
+                else:
+                    grid_text += "❓ "
+            if child.x == 2: grid_text += "\n" # New line every 3 buttons
+            
+        embed.add_field(name="Plansza", value=grid_text)
+        embed.set_footer(text="Kliknij w przycisk aby zacząć grę!")
+        return embed
+
+    async def end_game(self, interaction, won):
+        self.game_over = True
+        self.won = won
+        for child in self.children:
+            child.disabled = True
+            if child.is_mine:
+                child.style = discord.ButtonStyle.danger
+                child.label = "💣"
+        
+        await interaction.response.edit_message(embed=self.create_embed(), view=self)
+
+
 # BOT COMMANDS #
 @bot.command()
 async def profil(ctx, member: discord.Member = None):
@@ -216,6 +319,7 @@ async def pomoc(ctx):
         "**!profil <@użytkownik>** - Pokazuje profil.",
         "**!avatar <@użytkownik>** - Pokazuje awatar.",
         "**!toplevel** - Pokazuje topka graczy (level).",
+        "**!saper** - Klasyczna gra w sapera.",
         "\n**--- KOMENDY ADMINISTRACYJNE 🔨 ---**",
         "**!clear <ilość>** - Usuwa wiadomości.",
     ]
@@ -256,7 +360,11 @@ async def toplevel(ctx):
 
     embed = discord.Embed(title="🏆 **Top 10 Graczy**", description=description or "Brak danych.", color=discord.Color.gold())
     await ctx.send(embed=embed)
-
+    
+@bot.command()
+async def saper(ctx):
+    view = MinesweeperGame(ctx.author.id)
+    await ctx.send(embed=view.create_embed(), view=view)
 
 # RUN #
 keep_alive()
@@ -264,6 +372,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
