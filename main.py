@@ -1,4 +1,5 @@
 import discord
+import aiohttp
 import os
 from discord.ext import commands, tasks
 from dotenv import load_dotenv
@@ -232,5 +233,6 @@ async def meme(ctx):
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
