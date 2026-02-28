@@ -222,7 +222,7 @@ async def toplevel(ctx):
 
 @bot.command()
 async def meme(ctx):
-    url = "https://meme-api.com/gimme/memes"
+    url = "https://memy.jeja.pl/"
     
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
@@ -247,6 +247,7 @@ async def meme(ctx):
 # RUN #
 keep_alive()
 bot.run(token)
+
 
 
 
