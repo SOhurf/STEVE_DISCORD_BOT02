@@ -222,8 +222,8 @@ class MinesweeperGame(discord.ui.View):
     def __init__(self, owner_id):
         super().__init__(timeout=120)
         self.owner_id = owner_id
-        self.grid_size = 5
-        self.num_mines = 3
+        self.grid_size = 3
+        self.num_mines = 2
         self.safe_tiles_cleared = 0
         self.game_over = False
         self.won = False
@@ -367,6 +367,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
