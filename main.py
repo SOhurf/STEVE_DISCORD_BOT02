@@ -68,7 +68,7 @@ def format_uptime(delta):
     return " ".join(parts)
 
 # BACKGROUND VOICE LOOP #
-@tasks.loop(minutes=1.5)
+@tasks.loop(minutes=1.75)
 async def give_voice_xp():
     data = load_data()
     updated = False
@@ -83,7 +83,7 @@ async def give_voice_xp():
                     user["exp"] += 60
                     updated = True
                     
-                    xp_needed = user["level"] * 100
+                    xp_needed = user["level"] * 150
                     if user["exp"] >= xp_needed:
                         user["level"] += 1
                         user["exp"] = 0
@@ -165,8 +165,8 @@ async def on_message(message):
     user = next((m for m in data if m["id"] == message.author.id), None)
     
     if user:
-        user["exp"] += random.randint(30, 60)
-        xpNeeded = user["level"] * 100
+        user["exp"] += random.randint(20,30)
+        xpNeeded = user["level"] * 150
         
         if user["exp"] >= xpNeeded:
             user["level"] += 1
@@ -367,6 +367,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
