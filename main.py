@@ -303,7 +303,8 @@ async def profil(ctx, member: discord.Member = None):
             title=f"**Profil Gracza: `{user_data['username']}`👷‍♂️**",
             description=f"**Poziom: `{user_data['level']}`**\n"
                         f"**EXP: `{user_data['exp']}/{xp_limit}`**\n"
-                        f"**ID: `{user_data['id']}`**",
+                        f"**ID: `{user_data['id']}`**\n",
+                        f"**Data Dołączenia: `{user_data['joined_date']}`**",
             color=discord.Color.blue(),
         )
         await ctx.send(embed=embed)
@@ -367,6 +368,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
