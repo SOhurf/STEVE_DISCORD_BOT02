@@ -17,8 +17,6 @@ token = os.getenv("DISCORD_TOKEN")
 filePath = "/app/data/data.json" 
 levelUpChannelId = 1459662203102957645
 startTime = datetime.now()
-easyMode = False
-mediumMode = False
 
 if not token:
     print("❌ ERROR: No DISCORD_TOKEN found in environment variables.")
@@ -224,12 +222,8 @@ class MinesweeperGame(discord.ui.View):
     def __init__(self, owner_id):
         super().__init__(timeout=120)
         self.owner_id = owner_id
-        if easyMode == True:
-            self.grid_size = 3
-            self.num_mines = 2
-        elif mediumMode == True:
-            self.grid_size = 3
-            self.num_mines = 6
+        self.grid_size = 3
+        self.num_mines = 2
         self.safe_tiles_cleared = 0
         self.game_over = False
         self.won = False
@@ -287,8 +281,6 @@ class MinesweeperGame(discord.ui.View):
     async def end_game(self, interaction, won):
         self.game_over = True
         self.won = won
-        easyMode = False
-        mediumMode = False
         for child in self.children:
             child.disabled = True
             if child.is_mine:
@@ -366,18 +358,9 @@ async def toplevel(ctx):
     await ctx.send(embed=embed)
     
 @bot.command()
-async def saper(ctx, mode: str):
-    if mode:
-        if mode == "latwy":
-            easyMode = True
-            view = MinesweeperGame(ctx.author.id)
-            await ctx.send(embed=view.create_embed(), view=view)
-        elif mode == "sredni":
-            mediumMode = True
-            view = MinesweeperGame(ctx.author.id)
-            await ctx.send(embed=view.create_embed(), view=view)
-    else:
-        await ctx.send("Nie podano poziomu trudności!")
+async def saper(ctx):
+    view = MinesweeperGame(ctx.author.id)
+    await ctx.send(embed=view.create_embed(), view=view)
 
 # RUN #
 keep_alive()
@@ -385,6 +368,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
