@@ -376,6 +376,8 @@ async def saper(ctx, mode: str):
             mediumMode = True
             view = MinesweeperGame(ctx.author.id)
             await ctx.send(embed=view.create_embed(), view=view)
+    else:
+        await ctx.send("Nie podano poziomu trudności!")
 
 # RUN #
 keep_alive()
@@ -383,6 +385,7 @@ try:
     bot.run(token)
 except discord.errors.HTTPException as e:
     print(f"❌ Błąd logowania: {e}")
+
 
 
 
